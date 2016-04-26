@@ -1,0 +1,79 @@
+#+TITLE: Contrail Machine Vision
+* NASA Space Apps challenge 2016
+The [[https://2016.spaceappschallenge.org/challenges/aero/clouds-or-contrails/][Clouds or Contrails]] challenge asks competitors to present a
+solution for identifying contrails left by planes. This part of
+CLASA's solution entails a machine vision classifier that
+discriminates between photos of contrails vs. other clouds.
+
+* How it works
+** Data pre-processing
+Images arrive from many different devices, each with different
+resolutions and colour profiles. First, images are pre-processed to
+attempt to make images from different sources as similar as
+possible. The following image shows the pre-processing pipeline.
+
+#+BEGIN_SRC dot :file readme/preprocessing.png :exports results
+digraph {
+  input [label="", shape=none, width=0]
+  output [label="", shape=none, width=0]
+  node [shape=record];
+  rankdir=LR;
+  input -> resize -> grayscale -> rescale -> smooth -> threshhold -> output;
+
+  resize [label="Resize | Make all images&#92;na common size"]
+  grayscale [label="Grayscale | Remove all&#92;ncolour"]
+  rescale [label="Rescale | Use identical&#92;nintensity ranges"]
+  smooth [label="Smooth | Smooth image&#92;nedges"]
+  threshhold [label="Threshhold | Convert images&#92;nto 2 colours"]
+}
+#+END_SRC
+
+#+RESULTS:
+[[file:readme/preprocessing.png]]
+
+[[file:ml-model/1.jpg]]
+
+[[file:ml-model/2.jpg]]
+
+[[file:ml-model/3.jpg]]
+
+[[file:ml-model/4.jpg]]
+
+[[file:ml-model/5.jpg]]
+
+[[file:ml-model/6.jpg]]
+
+** Features
+Next, certain image features are quantified. Images will be recognised
+and classified using these features. All chosen features are based off
+the [[https://en.wikipedia.org/wiki/Hough_transform][Hough Transform]], which was chosen for its ability to recognise
+lines: a critical differing feature of contrails. The exact features
+are:
+- Standard deviation of the Hough space.
+- Kurtosis of the Hough space -- to identify where lines are dominant.
+- Z-score of the maximum in Hough space -- again searching for
+  dominance of a single line.
+- Standard deviation of angles of recognised lines -- are lines
+  parallel?
+- Number of identified lines
+
+** Learning
+The learning algorithm itself is the [[https://en.wikipedia.org/wiki/Random_forest][Random Forest]] classifier. This is
+a method of machine learning, meaning that the computer must decide
+for itself which of the provided features are important in determining
+whether an image is of a contrail or not.
+
+** Training and verification
+The models are trained on test data collected by entering the terms
+"contrail" and "cirrus" into Google Images. 10-fold cross-validation
+determined the model estimated with approximately 75% accuracy.
+
+** Improvements
+The implementation is a proof of concept only, and could be made far
+more accurate. Firstly, more features should be taken from the
+data. These could include a host of other features, for example:
+[[https://en.wikipedia.org/wiki/Connected_component_(graph_theory)][connected componets]], and using graph analysis, blob analysis, and
+possibly texture analysis (not on theshholded images). Other learning
+models may also be investigated. Finally, a large dataset could be
+used for training, which will be collected through CLASA's web
+dashboard.
