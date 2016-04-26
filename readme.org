@@ -77,3 +77,9 @@ possibly texture analysis (not on theshholded images). Other learning
 models may also be investigated. Finally, a large dataset could be
 used for training, which will be collected through CLASA's web
 dashboard.
+
+* Folders
+- [[./ml-model][=ml-model=]] contains the python machine training and verification
+  code.
+- [[./flask-server][=./flask-server=]] contains a web RESTFUL API, currently only
+  returning features rather than classification results.
